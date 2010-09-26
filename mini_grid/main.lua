@@ -13,10 +13,10 @@ end
 
 function ram:next_color(o)
   col = self:current_color()
-  print("before: " .. self.sci)
+ -- print("before: " .. self.sci)
 
   self.sci = (self.sci) % #self.color + 1
-  print("after: " .. self.sci)
+ -- print("after: " .. self.sci)
 
   local r = math.floor(col / 256 / 256)
   local g = math.floor((col / 256) % 256)
@@ -34,8 +34,8 @@ function draw:tile(xmax,ymax,width,callback,startx,starty)
   local group = display.newGroup()
   for x = 1, xmax, 1 do
     for y = 1, ymax, 1 do
-      left = (x*width) + startx
-      top =  (y*width) + starty
+      left = ((x-1)*width) + startx
+      top =  ((y-1)*width) + starty
       local s = display.newRect(left,top,width,width) 
       group:insert(s)
       callback(s,x,y) 
@@ -51,16 +51,22 @@ function maxigrid:draw(mini,scale)
   local d_vcw =  display.viewableContentWidth
   local d_vch = display.viewableContentHeight
   square_width = math.floor(scale * mini.width)
-  dw = math.floor(d_vcw / square_width) +1 
-  dh = math.floor(d_vch / square_width) +1 -- draw offscreen
-  local el  = 0
+  dw = math.floor(d_vcw / square_width)  
+  dh = math.floor(d_vch / square_width)-- draw offscreen
+  print('begin')
   self.group = draw:tile(dw,dh,square_width,function(s,x,y)
-    el = (el  % mini.group.numChildren )+ 1
+    x = x % math.sqrt(mini.num) +1 
+    y = y % math.sqrt(mini.num) +1
+    local el = (((x-1)*math.sqrt(mini.num)+y))
+    if el == 0 then
+      el = 9
+    end
     print('el ' .. el)
-    s.strokeWidth = 2
-    s:setStrokeColor(0xff,0xff,0xff)
+   --  s.strokeWidth = 2
+   --  s:setStrokeColor(0xff,0xff,0xff)
     s:setFillColor(mini.group[el].r,mini.group[el].g,mini.group[el].b)
   end)
+  return self
 end
 
 minigrid = {}
@@ -85,11 +91,11 @@ function minigrid:drawTile(startx,starty,num,width)
     s.strokeWidth = 2
     s:setStrokeColor(0xff,0xff,0xff)
     function s:tap(event) 
-      print('-x:'..self.x.. '-y:'..self.y)
-      print('-w:'..self.width.. '-h:'..self.height)
+      --print('-x:'..self.x.. '-y:'..self.y)
+      --print('-w:'..self.width.. '-h:'..self.height)
       ram:next_color(self) 
-      print(self)
-      print('---')
+      --print(self)
+      --print('---')
       maxigrid:draw(grid,50)
       this:redraw ()
     end
@@ -97,6 +103,6 @@ function minigrid:drawTile(startx,starty,num,width)
   end,startx,starty)
 end
 
-grid = minigrid:new(0,20,4,width)
+grid = minigrid:new(0,0,3,width)
 
 
