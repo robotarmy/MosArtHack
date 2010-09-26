@@ -16,6 +16,23 @@ function radColor(o)
   o:setFillColor( o.r, o.g, o.b )
 end
 
+local draw = {}
+function draw:tile(xmax,ymax,width,callback,startx,starty)
+  startx = startx or 0
+  starty = starty or 0
+  local group = display.newGroup()
+  for x = 0, xmax, 1 do
+    for y = 0, ymax, 1 do
+      left = (x*width) + startx
+      top =  (y*width)  + starty
+      local s = display.newRect(left,top,width,width) 
+      group:insert(s)
+      callback(s,x,y) 
+    end
+  end
+  return group
+end
+
 maxigrid = {}
 
 function maxigrid:draw(mini,scale)
@@ -25,52 +42,44 @@ function maxigrid:draw(mini,scale)
   square_width = scale * mini.width
   dw = d_vcw / square_width
   dh = d_vch / square_width
-  for x = 0,dw,1 do
-    for y = 0,dh,1 do
-      left = (x*square_width) 
-      top =  (y*square_width) 
-      print("left" .. left)
-      print("top" .. top)
-      local s = display.newRect(left,top,width,width) 
+  self.group = draw:tile(dw,dh,square_width,function(s,x,y)
       local el = (x+y) % mini.num + 1
       print(el)
-      print(mini.set[el].r)
-      s:setFillColor(mini.set[el].r,mini.set[el].g,mini.set[el].b)
-    end
-  end
+      print(mini.group[el].r)
+      s:setFillColor(mini.group[el].r,mini.group[el].g,mini.group[el].b)
+  end)
 end
-minigrid = {}
 
-function minigrid:rect(startx,starty,num,width) 
-  self.set = {}
+minigrid = {}
+function minigrid:new(startx,starty,num,width)
+  self.group = minigrid:drawTile(startx,starty,num,width) 
   self.num = num * num
   self.width = width
+  print(self.group.numChildren)
+  assert(self.group.numChildren == self.num)
+  return self
+end
+function minigrid:redraw()
+  local parent = self.group.parent
+  parent:insert(self.group)
+end
+function minigrid:drawTile(startx,starty,num,width) 
   local this = self
-  local left = 0
-  local top = 0
-  for x = 0,num-1,1 do
-    for  y = 0,num-1,1 do
-      print("left" .. left)
-      print("top" .. top)
-      left = (x*width) + startx
-      top =  (y*width)  + starty
-      local s = display.newRect(left,top,width,width) 
+  return draw:tile(num-1,num-1,width,function (s)
       radColor(s)
-      table.insert(self.set,s)
-      function s:tap(event) 
+    function s:tap(event) 
         print('-x:'..self.x.. '-y:'..self.y)
         print('-w:'..self.width.. '-h:'..self.height)
         radColor(self) 
         print(self)
         print('---')
-        maxigrid:draw(this,50)
+       maxigrid:draw(grid,50)
+       this:redraw ()
       end
-      s:addEventListener( "tap", s )
-    end
-  end
-  return self
+    s:addEventListener( "tap", s )
+  end,startx,starty)
 end
 
-grid = minigrid:rect(0,20,2,width)
-assert(#grid.set == 4)
+grid = minigrid:new(0,20,2,width)
+
 
