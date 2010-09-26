@@ -4,9 +4,9 @@
 --
 --
 
-local width = 30
+local width = 100
 
-local ram = {color = {0x193310,0x9EFA18,0xD4421E,0xA2C5A7,0x5C0903,0xFFFFFF}, sci = 1}
+local ram = {color = {0x000000,0x888888,0xFFFFFF}, sci = 1}
 function ram:current_color()
   return self.color[self.sci]
 end
@@ -97,6 +97,6 @@ function minigrid:drawTile(startx,starty,num,width)
   end,startx,starty)
 end
 
-grid = minigrid:new(0,20,8,width)
+grid = minigrid:new(0,20,4,width)
 
 
