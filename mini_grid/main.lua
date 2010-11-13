@@ -6,7 +6,7 @@
 
 local width = 100
 
-local ram = {color = {0x000000,0x888888,0xFFFFFF}, sci = 1}
+local ram = {version =1,color = {0xAAAAAA,0x885588,0x000000}, sci = 1}
 function ram:current_color()
   return self.color[self.sci]
 end
@@ -17,7 +17,8 @@ function ram:next_color(o)
 
   self.sci = (self.sci) % #self.color + 1
  -- print("after: " .. self.sci)
-
+  --
+  -- very good lesson below
   local r = math.floor(col / 256 / 256)
   local g = math.floor((col / 256) % 256)
   local b = math.floor((col % 256) % 256)
@@ -103,6 +104,6 @@ function minigrid:drawTile(startx,starty,num,width)
   end,startx,starty)
 end
 
-grid = minigrid:new(0,0,3,width)
+grid = minigrid:new(0,20,4,width)
 
 
