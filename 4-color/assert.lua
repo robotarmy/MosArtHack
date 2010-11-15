@@ -7,91 +7,31 @@ assert(amaze:bound(1,-1) == 1)
 assert(amaze:bound(N,1) == N)
 
 
---
--- basic instance support in lua
---  class = {class_var = 1}
---  class.__index = class
---  function class:a_constructor() 
---   local c = {} -- the instance
---   setmetatable(c,class) -- connect (what are metatables really?)
---   c.instance_var = 1
---   return c -- our new instance
---  end
---  function class:instance_method()
---  end
---  local a_class = class:a_constructor()
---  a_class:instance_method()
---
-
-
 robot = {}
-robot.__index = robot
-
 function robot:visited_count()
   return self.vcount
 end
 function robot:visited(x,y)
-  return self.map[self.maze:at(x,y)] ~= nil
+  return self.map[amaze:at(x,y)] ~= nil
 end
 function robot:mark_visit(x,y)
   if not self:visited(x,y) then
-    local node = self.maze:at(x,y)
-    self.map[node] = {x=x,y=y}
+    self.map[amaze:at(x,y)] = {x=x,y=y}
     self.vcount = self.vcount +1 
   end
 end
-
 function robot:init(maze,x,y)
-  local rbt = {}
-  setmetatable(rbt,robot)
-  -- instance vars
-  rbt.x = x 
-  rbt.y = y
-  rbt.maze = maze
-  rbt.map = {}
-  rbt.vcount = 0
-  rbt:mark_visit(x,y)
-  return rbt
+  self.x = x ; self.y = y
+  self.map = {}
+  self.maze = maze
+  self.vcount = 0
+  self:mark_visit(x,y)
+  return self
 end
 
 local robby = robot:init(amaze,1,1)
 assert(robby.x == 1)
 assert(robby.y == 1)
-assert(robby:visited_count() == 1)
-local rob2 = robot:init(amaze,3,3)
-assert(rob2:visited_count() == 1)
-
-function robot:visit_list()
-  local list = {}
-  for k,v in pairs(self.map) do
-    list[#list+1] = k
-  end
-  return list
-end
-
-local array = rob2:visit_list()
-assert(#array == 1)
-
-thing = {}
-local m = maze:init_with_func(3,function()
-  return thing
-end)
-assert(thing.room ~= nil)
-assert(thing.maze ~= nil)
-assert(thing.room.parent ~= nil)
-assert(thing.room.parent == thing)
-local r = robot:init(m,1,1)
-assert(thing.room ~= nil)
-assert(thing.maze ~= nil)
-assert(thing.room.parent ~= nil)
-assert(thing.room.parent == thing)
-local array = r:visit_list()
-assert(array[1].parent == thing)
-assert(array[1].parent.room ~= nil)
-assert(array[1].parent.maze ~= nil)
-assert(array[1].parent.room.parent ~= nil)
-assert(array[1].parent.room.parent == thing)
-
 
 function robot:check_bounded(dx,dy) 
   if (self.maze:bound(self.x,dx) == self.x) and
